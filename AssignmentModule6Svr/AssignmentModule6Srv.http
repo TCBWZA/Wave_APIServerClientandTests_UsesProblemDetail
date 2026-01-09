@@ -1,0 +1,381 @@
+@AssignmentModule6_HostAddress = http://localhost:5030
+@ApiToken = ThisIsANewToken
+
+### Test Variables
+@testCustomerId = 1
+@testPhoneNumberId = 1
+@testInvoiceNumber = INV-12345678
+
+###############################################
+# Customers Controller
+###############################################
+
+### Get all customers
+GET {{AssignmentModule6_HostAddress}}/api/customers
+Accept: application/json
+
+### Get customer by ID
+GET {{AssignmentModule6_HostAddress}}/api/customers/{{testCustomerId}}
+Accept: application/json
+
+### Get customer by invalid ID (404)
+GET {{AssignmentModule6_HostAddress}}/api/customers/99999
+Accept: application/json
+
+### Get customer invoices
+GET {{AssignmentModule6_HostAddress}}/api/customers/{{testCustomerId}}/Invoices
+Accept: application/json
+
+### Create a new customer (ID auto-generated - any provided ID is ignored)
+POST {{AssignmentModule6_HostAddress}}/api/customers
+Content-Type: application/json
+
+{
+  "name": "Test Customer",
+  "email": "test@example.com"
+}
+
+### Create customer with phone numbers and invoices (IDs auto-generated)
+POST {{AssignmentModule6_HostAddress}}/api/customers
+Content-Type: application/json
+
+{
+  "name": "Complete Test Customer",
+  "email": "complete@example.com",
+  "phoneNumbers": [
+    {
+      "number": "555-0001",
+      "type": "Mobile"
+    },
+    {
+      "number": "555-0002",
+      "type": "Work"
+    },
+    {
+      "number": "555-0003",
+      "type": "DirectDial"
+    }
+  ],
+  "invoices": [
+    {
+      "invoiceNumber": "INV-TEST001",
+      "invoiceDate": "2024-01-15T00:00:00",
+      "amount": 1500.50
+    },
+    {
+      "invoiceNumber": "INV-TEST002",
+      "invoiceDate": "2024-02-20T00:00:00",
+      "amount": 2750.75
+    },
+    {
+      "invoiceNumber": "INV-TEST003",
+      "invoiceDate": "2024-03-10T00:00:00",
+      "amount": 980.25
+    }
+  ]
+}
+
+### Update existing customer
+PUT {{AssignmentModule6_HostAddress}}/api/customers/{{testCustomerId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Customer Name",
+  "email": "updated@example.com"
+}
+
+### Delete customer (requires API Key)
+DELETE {{AssignmentModule6_HostAddress}}/api/customers/{{testCustomerId}}
+X-API-Key: {{ApiToken}}
+
+### Delete customer without token (401)
+DELETE {{AssignmentModule6_HostAddress}}/api/customers/10
+
+### Delete non-existing customer (404)
+DELETE {{AssignmentModule6_HostAddress}}/api/customers/99999
+X-API-Key: {{ApiToken}}
+
+###############################################
+# Phone Numbers Controller
+###############################################
+
+### Get all phone numbers
+GET {{AssignmentModule6_HostAddress}}/api/phonenumbers
+Accept: application/json
+
+### Get phone number by ID
+GET {{AssignmentModule6_HostAddress}}/api/phonenumbers/{{testPhoneNumberId}}
+Accept: application/json
+
+### Get phone numbers by customer ID
+GET {{AssignmentModule6_HostAddress}}/api/phonenumbers/customer/{{testCustomerId}}
+Accept: application/json
+
+### Get phone numbers by invalid customer ID (404)
+GET {{AssignmentModule6_HostAddress}}/api/phonenumbers/customer/99999
+Accept: application/json
+
+### Create a new phone number (ID auto-generated - any provided ID is ignored)
+POST {{AssignmentModule6_HostAddress}}/api/phonenumbers
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "number": "555-1234",
+  "type": "Mobile"
+}
+
+### Create phone number with different types
+POST {{AssignmentModule6_HostAddress}}/api/phonenumbers
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "number": "(555) 987-6543",
+  "type": "Work"
+}
+
+### Create phone number - DirectDial type
+POST {{AssignmentModule6_HostAddress}}/api/phonenumbers
+Content-Type: application/json
+
+{
+  "customerId": 1,
+  "number": "555-DIRECT",
+  "type": "DirectDial"
+}
+
+### Delete phone number by ID (requires API Key)
+DELETE {{AssignmentModule6_HostAddress}}/api/phonenumbers/{{testPhoneNumberId}}
+X-API-Key: {{ApiToken}}
+
+### Delete phone number without token (401)
+DELETE {{AssignmentModule6_HostAddress}}/api/phonenumbers/1
+
+### Delete all phone numbers by customer ID (requires API Key)
+DELETE {{AssignmentModule6_HostAddress}}/api/phonenumbers/customer/{{testCustomerId}}
+X-API-Key: {{ApiToken}}
+
+###############################################
+# Invoices Controller
+###############################################
+
+### Get all invoices
+GET {{AssignmentModule6_HostAddress}}/api/invoices
+Accept: application/json
+
+### Get invoice by customer ID and invoice number
+GET {{AssignmentModule6_HostAddress}}/api/invoices/{{testCustomerId}}/{{testInvoiceNumber}}
+Accept: application/json
+
+### Get invoices by customer ID
+GET {{AssignmentModule6_HostAddress}}/api/invoices/customer/{{testCustomerId}}
+Accept: application/json
+
+### Get invoices by invalid customer ID (404)
+GET {{AssignmentModule6_HostAddress}}/api/invoices/customer/99999
+Accept: application/json
+
+### Create a new invoice (ID auto-generated, invoiceNumber required and must start with "INV")
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INV-NEW00001",
+  "invoiceDate": "2024-12-12T00:00:00",
+  "amount": 2500.00,
+  "customerId": 1
+}
+
+### Create invoice with different number format
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INV-2025-JANUARY-001",
+  "invoiceDate": "2025-01-20T00:00:00",
+  "amount": 3500.50,
+  "customerId": 1
+}
+
+### Delete invoice by invoice number (requires API Key)
+DELETE {{AssignmentModule6_HostAddress}}/api/invoices/{{testInvoiceNumber}}
+X-API-Key: {{ApiToken}}
+
+### Delete invoice without token (401)
+DELETE {{AssignmentModule6_HostAddress}}/api/invoices/INV-TEST001
+
+### Delete all invoices by customer ID (requires API Key)
+DELETE {{AssignmentModule6_HostAddress}}/api/invoices/customer/{{testCustomerId}}
+X-API-Key: {{ApiToken}}
+
+###############################################
+# Error Testing Scenarios
+###############################################
+
+### Create customer with null body (400)
+POST {{AssignmentModule6_HostAddress}}/api/customers
+Content-Type: application/json
+
+### Create customer with empty body (400)
+POST {{AssignmentModule6_HostAddress}}/api/customers
+Content-Type: application/json
+
+{}
+
+### Create phone number with invalid customer ID (404)
+POST {{AssignmentModule6_HostAddress}}/api/phonenumbers
+Content-Type: application/json
+
+{
+  "customerId": 99999,
+  "number": "555-9999",
+  "type": "Mobile"
+}
+
+### Create phone number with invalid customerId value (400)
+POST {{AssignmentModule6_HostAddress}}/api/phonenumbers
+Content-Type: application/json
+
+{
+  "customerId": 0,
+  "number": "555-9999",
+  "type": "Mobile"
+}
+
+### Create invoice with invalid customer ID (404)
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INV-INVALID",
+  "invoiceDate": "2024-12-12T00:00:00",
+  "amount": 1000.00,
+  "customerId": 99999
+}
+
+### Create invoice without invoice number (400 - Required field)
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceDate": "2024-12-12T00:00:00",
+  "amount": 1000.00,
+  "customerId": 1
+}
+
+### Create invoice with invalid invoice number format (400 - Must start with "INV")
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INVOICE-001",
+  "invoiceDate": "2024-12-12T00:00:00",
+  "amount": 1000.00,
+  "customerId": 1
+}
+
+### Create invoice with duplicate invoice number (409)
+# First, create an invoice with this number, then run this request again
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INV-DUPLICATE-TEST",
+  "invoiceDate": "2024-12-12T00:00:00",
+  "amount": 1000.00,
+  "customerId": 1
+}
+
+### Create invoice with invalid customerId (400)
+POST {{AssignmentModule6_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INV-TEST-INVALID",
+  "invoiceDate": "2024-12-12T00:00:00",
+  "amount": 1000.00,
+  "customerId": 0
+}
+
+###############################################
+# Update Testing Scenarios
+###############################################
+
+### Update non-existent customer (404)
+PUT {{AssignmentModule6_HostAddress}}/api/customers/99999
+Content-Type: application/json
+
+{
+  "name": "Non-existent Customer",
+  "email": "nonexistent@example.com"
+}
+
+### Update customer with invalid ID (400)
+PUT {{AssignmentModule6_HostAddress}}/api/customers/0
+Content-Type: application/json
+
+{
+  "name": "Invalid ID Customer",
+  "email": "invalid@example.com"
+}
+
+###############################################
+# Health Check
+###############################################
+
+### Health check endpoint
+GET {{AssignmentModule6_HostAddress}}/health
+Accept: application/json
+
+###############################################
+# OpenAPI Specification
+###############################################
+
+### Get OpenAPI specification
+GET {{AssignmentModule6_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###############################################
+# Testing Notes
+###############################################
+
+# API Behavior Notes:
+# - All IDs (Customer, Invoice, Phone Number) are AUTO-GENERATED by the server
+# - Any ID provided in POST requests is IGNORED
+# - Invoice IDs are globally unique (increment across all customers)
+# - Phone Number IDs are globally unique (increment across all customers)
+# - Invoice Numbers must be provided by the user and start with "INV"
+# - Invoice Numbers must be unique across ALL customers
+# - No caching: All responses include Cache-Control: no-cache headers
+# - DELETE operations require X-API-Key header with value: ThisIsANewToken
+# - Deleting a customer cascades to delete their invoices and phone numbers
+
+# Valid Phone Number Types:
+# - Mobile
+# - Work
+# - DirectDial
+
+# Invoice Number Requirements:
+# - Must start with "INV" (case-sensitive)
+# - Must be unique across all customers
+# - Examples: INV-001, INV-2025-JANUARY-001, INV-ABC-123
+
+# Error Response Format (RFC 7807 Problem Details):
+# All errors return Problem Details JSON with:
+# - title: Error title
+# - status: HTTP status code
+# - detail: Detailed error message
+# - instance: Request path
+# - traceId: Correlation ID for debugging
+# - Additional context in extensions
+
+# Status Codes:
+# 200 - OK (GET, PUT success)
+# 201 - Created (POST success)
+# 204 - No Content (DELETE success)
+# 400 - Bad Request (Validation error)
+# 401 - Unauthorized (Missing/invalid API key)
+# 404 - Not Found (Resource doesn't exist)
+# 409 - Conflict (Duplicate invoice number)
+# 500 - Internal Server Error
